@@ -55,6 +55,30 @@ ARTIFACTORY_SERVER_NAME=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ART
 #Configuring nginx
 rm /etc/nginx/sites-enabled/default
 
+cat <<EOF >/etc/nginx/nginx.conf
+  #user  nobody;
+  worker_processes  1;
+  error_log  /var/log/nginx/error.log  info;
+  #pid        logs/nginx.pid;
+  events {
+    worker_connections  1024;
+  }
+
+  http {
+    include       mime.types;
+    include    /etc/nginx/conf.d/*.conf;
+    default_type  application/octet-stream;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    '$status $body_bytes_sent "$http_referer" '
+    '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
+    sendfile        on;
+    #tcp_nopush     on;
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+    }
+EOF
+
 cat <<EOF >/etc/nginx/conf.d/artifactory.conf
 ssl_certificate      /etc/pki/tls/certs/cert.pem;
 ssl_certificate_key  /etc/pki/tls/private/cert.key;
