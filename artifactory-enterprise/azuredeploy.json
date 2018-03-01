@@ -697,6 +697,7 @@
           "storageProfile": {
             "osDisk": {
               "caching": "ReadWrite",
+              "diskSizeGB": "200",
               "createOption": "FromImage"
             },
             "imageReference": "[variables('imageReference')]"
