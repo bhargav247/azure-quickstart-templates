@@ -197,17 +197,13 @@ sed -i -e "s/art1/art-$(date +%s$RANDOM)/" /var/opt/jfrog/artifactory/etc/ha-nod
 sed -i -e "s/127.0.0.1/$HOSTNAME/" /var/opt/jfrog/artifactory/etc/ha-node.properties
 sed -i -e "s/172.25.0.3/$HOSTNAME/" /var/opt/jfrog/artifactory/etc/ha-node.properties
 
-cat /var/lib/cloud/instance/user-data.txt | grep "^CERTIFICATE=" | sed "s/CERTIFICATE=//" | sed 's/BEGIN CERTIFICATE/BEGIN-CERTIFICATE/g' | sed 's/END CERTIFICATE/END-CERTIFICATE/g' | tr ' ' '\n' > /tmp/temp.pem
-cat /tmp/temp.pem | sed 's/ /\n/g' | sed 's/BEGIN-CERTIFICATE/BEGIN CERTIFICATE/g' | sed 's/END-CERTIFICATE/END CERTIFICATE/g' > /etc/pki/tls/certs/cert.pem
+cat /var/lib/cloud/instance/user-data.txt | grep "^CERTIFICATE=" | sed "s/CERTIFICATE=//" > /tmp/temp.pem
+cat /tmp/temp.pem | sed 's/CERTIFICATE----- /&\n/g' | sed 's/ -----END/\n-----END/g' | awk '{if($0 ~ /----/) {print;} else { gsub(/ /,"\n");print;}}' > /etc/pki/tls/certs/cert.pem
 rm /tmp/temp.pem
 
-cat /var/lib/cloud/instance/user-data.txt | grep "^CERTIFICATE_KEY=" | sed "s/CERTIFICATE_KEY=//" | sed 's/BEGIN PRIVATE KEY/BEGIN-PRIVATE-KEY/g' | sed 's/END PRIVATE KEY/END-PRIVATE-KEY/g' > /tmp/temp.key
-cat /tmp/temp.key | sed 's/BEGIN RSA PRIVATE KEY/BEGIN-RSA-PRIVATE-KEY/g' | sed 's/END RSA PRIVATE KEY/END-RSA-PRIVATE-KEY/g' > /tmp/temp1.key
-cat /tmp/temp1.key | sed 's/ /\n/g' | sed 's/BEGIN-PRIVATE-KEY/BEGIN PRIVATE KEY/g' | sed 's/END-PRIVATE-KEY/END PRIVATE KEY/g' > /tmp/temp2.key
-cat /tmp/temp2.key | sed 's/BEGIN-RSA-PRIVATE-KEY/BEGIN RSA PRIVATE KEY/g' | sed 's/END-RSA-PRIVATE-KEY/END RSA PRIVATE KEY/g' > /etc/pki/tls/private/cert.key
+cat /var/lib/cloud/instance/user-data.txt | grep "^CERTIFICATE_KEY=" | sed "s/CERTIFICATE_KEY=//" > /tmp/temp.key
+cat /tmp/temp.key | sed 's/KEY----- /&\n/' | sed 's/ -----END/\n-----END/' | awk '{if($0 ~ /----/) {print;} else { gsub(/ /,"\n");print;}}' > /etc/pki/tls/private/cert.key
 rm /tmp/temp.key
-rm /tmp/temp1.key
-rm /tmp/temp2.key
 
 echo "artifactory.ping.allowUnauthenticated=true" >> /var/opt/jfrog/artifactory/etc/artifactory.system.properties
 EXTRA_JAVA_OPTS=$(cat /var/lib/cloud/instance/user-data.txt | grep "^EXTRA_JAVA_OPTS=" | sed "s/EXTRA_JAVA_OPTS=//")
