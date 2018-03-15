@@ -15,7 +15,7 @@ ARTIFACTORY_LICENSE_3=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_
 ARTIFACTORY_LICENSE_4=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_LIC4=" | sed "s/ARTI_LIC4=//")
 ARTIFACTORY_LICENSE_5=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_LIC5=" | sed "s/ARTI_LIC5=//")
 
-UBUNTU_CODENAME=$(cat /etc/os-release | grep "^UBUNTU_CODENAME=" | sed "s/UBUNTU_CODENAME=//")
+UBUNTU_CODENAME=$(cat /etc/lsb-release | grep "^DISTRIB_CODENAME=" | sed "s/DISTRIB_CODENAME=//")
 
 export DEBIAN_FRONTEND=noninteractive
 
