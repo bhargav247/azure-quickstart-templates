@@ -3,12 +3,12 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vmSku": {
-      "value": "Standard_A1"
+      "value": "Standard_A3"
     },
-    "vmssName": {
+    "clusterName": {
       "value": "GEN-UNIQUE"
     },
-    "capacity": {
+    "nodeCount": {
       "value": 1
     },
     "adminUsername": {
@@ -18,10 +18,10 @@
       "value": "GEN-PASSWORD"
     },
     "artifactoryVersion": {
-      "value": "5.8.1"
+      "value": "5.9.0"
     },
     "masterKey": {
-      "value": "35767fa0164bac66b6cccb8880babefb"
+      "value": "1ce2be4490ca2c662cb79636cf9b7b8e"
     }
   }
 }
