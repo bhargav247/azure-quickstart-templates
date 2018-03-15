@@ -1,22 +1,21 @@
 #!/bin/bash
+DB_URL=$(cat /var/lib/cloud/instance/user-data.txt | grep "^JDBC_STR" | sed "s/JDBC_STR=//")
+DB_NAME=$(cat /var/lib/cloud/instance/user-data.txt | grep "^DB_NAME=" | sed "s/DB_NAME=//")
+DB_USER=$(cat /var/lib/cloud/instance/user-data.txt | grep "^DB_ADMIN_USER=" | sed "s/DB_ADMIN_USER=//")
+DB_PASSWORD=$(cat /var/lib/cloud/instance/user-data.txt | grep "^DB_ADMIN_PASSWD=" | sed "s/DB_ADMIN_PASSWD=//")
+STORAGE_ACCT=$(cat /var/lib/cloud/instance/user-data.txt | grep "^STO_ACT_NAME=" | sed "s/STO_ACT_NAME=//")
+STORAGE_CONTAINER=$(cat /var/lib/cloud/instance/user-data.txt | grep "^STO_CTR_NAME=" | sed "s/STO_CTR_NAME=//")
+STORAGE_ACCT_KEY=$(cat /var/lib/cloud/instance/user-data.txt | grep "^STO_ACT_KEY=" | sed "s/STO_ACT_KEY=//")
+ARTIFACTORY_VERSION=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTIFACTORY_VERSION=" | sed "s/ARTIFACTORY_VERSION=//")
+MASTER_KEY=$(cat /var/lib/cloud/instance/user-data.txt | grep "^MASTER_KEY=" | sed "s/MASTER_KEY=//")
+IS_PRIMARY=$(cat /var/lib/cloud/instance/user-data.txt | grep "^IS_PRIMARY=" | sed "s/IS_PRIMARY=//")
+ARTIFACTORY_LICENSE_1=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_LIC1=" | sed "s/ARTI_LIC1=//")
+ARTIFACTORY_LICENSE_2=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_LIC2=" | sed "s/ARTI_LIC2=//")
+ARTIFACTORY_LICENSE_3=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_LIC3=" | sed "s/ARTI_LIC3=//")
+ARTIFACTORY_LICENSE_4=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_LIC4=" | sed "s/ARTI_LIC4=//")
+ARTIFACTORY_LICENSE_5=$(cat /var/lib/cloud/instance/user-data.txt | grep "^ARTI_LIC5=" | sed "s/ARTI_LIC5=//")
 
-DB_URL=$1
-DB_NAME=$2
-DB_USER=$3
-DB_PASSWORD=$4
-
-STORAGE_ACCT=$5
-STORAGE_CONTAINER=$6
-STORAGE_ACCT_KEY=$7
-ARTIFACTORY_VERSION=$8
-MASTER_KEY=$9
-NODE_TYPE=$10
-
-ARTIFACTORY_LICENSE_1=$11
-ARTIFACTORY_LICENSE_2=$12
-ARTIFACTORY_LICENSE_3=$13
-ARTIFACTORY_LICENSE_4=$14
-ARTIFACTORY_LICENSE_5=$15
+UBUNTU_CODENAME=$(cat /etc/os-release | grep "^UBUNTU_CODENAME=" | sed "s/UBUNTU_CODENAME=//")
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -35,7 +34,7 @@ mkdir -p /etc/pki/tls/private/ /etc/pki/tls/certs/
 openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/pki/tls/private/example.key -out /etc/pki/tls/certs/example.pem -days 356 -subj "/C=US/ST=California/L=SantaClara/O=IT/CN=*.localhost"
 
 # install the MySQL stack
-echo "deb https://jfrog.bintray.com/artifactory-pro-debs trusty main" | tee -a /etc/apt/sources.list
+echo "deb https://jfrog.bintray.com/artifactory-pro-debs ${UBUNTU_CODENAME} main" | tee -a /etc/apt/sources.list
 curl https://bintray.com/user/downloadSubjectPublicKey?username=jfrog | apt-key add -
 apt-get update
 apt-get -y install nginx>> /tmp/install-nginx.log 2>&1
@@ -133,7 +132,7 @@ artifactory.ha.data.dir=/var/opt/jfrog/artifactory/data
 context.url=http://127.0.0.1:8081/artifactory
 membership.port=10001
 hazelcast.interface=172.25.0.3
-primary=${NODE_TYPE}
+primary=${IS_PRIMARY}
 EOF
 
 cat <<EOF >/var/opt/jfrog/artifactory/etc/db.properties
@@ -216,3 +215,4 @@ sleep $((RANDOM % 120))
 service artifactory start
 service nginx start
 nginx -s reload
+echo "INFO: Artifactory installation completed."
